@@ -1,0 +1,74 @@
+/* :root adalah tempat kita simpan "variables" warna */
+:root {
+    /* Warna dari palet pilihan anda */
+    --primary-color: #102542;      /* Oxford Blue (untuk navbar & tajuk) */
+    --secondary-color: #F87060;    /* Bittersweet (untuk butang & amaran) */
+    --background-color: #CDD7D6;   /* Platinum (untuk latar belakang) */
+    --card-bg-color: #FFFFFF;      /* White (untuk kad) */
+    --text-color: #102542;
+}
+
+/* Guna Fon Poppins yang kita import tadi */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Gayakan Navbar Guna Warna Baru */
+.navbar.bg-dark {
+    background-color: var(--primary-color) !important;
+}
+
+/* Gayakan Butang Utama */
+.btn-primary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white; /* Tambah warna teks putih untuk kontras */
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* Tambah sedikit gaya pada kad */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--card-bg-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    font-weight: 600; /* Jadikan tajuk lebih tebal */
+}
+
+/* === KOD BARU DITAMBAH === */
+
+/* 1. Warna Ikon untuk Kad Statistik */
+.icon-primary {
+    color: var(--primary-color);
+}
+.icon-secondary {
+    color: var(--secondary-color);
+}
+
+/* 2. Gaya Khas untuk Kotak Amaran */
+.alert-custom-warning {
+    background-color: #FEECE9; /* Warna latar belakang lembut dari palet oren */
+    color: var(--primary-color);
+    border-left: 5px solid var(--secondary-color);
+    border-radius: 0.5rem;
+}
+.alert-custom-warning .alert-heading {
+    color: var(--secondary-color);
+}
+
+/* 3. Gaya Kepala Jadual */
+.table > thead {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    vertical-align: middle;
+}

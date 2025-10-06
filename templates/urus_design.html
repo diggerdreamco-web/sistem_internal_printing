@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block title %}Urus Reka Bentuk{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Urus Reka Bentuk Pesanan</h1>
+</div>
+
+{% if peranan == 'designer' and designer_stats %}
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm text-white" style="background-color: var(--secondary-color);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Tugasan Aktif</h5>
+                        <p class="display-4 fw-bold">{{ designer_stats.tugasan_aktif }}</p>
+                    </div>
+                    <i class="fas fa-pencil-ruler fa-3x opacity-50"></i>
+                </div>
+                <small>Jumlah pesanan yang perlu disiapkan.</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Reka Bentuk Selesai</h5>
+                        <p class="display-4 fw-bold">{{ designer_stats.rekabentuk_selesai }}</p>
+                    </div>
+                    <i class="fas fa-check-double fa-3x opacity-50"></i>
+                </div>
+                <small>Jumlah reka bentuk yang telah disiapkan.</small>
+            </div>
+        </div>
+    </div>
+</div>
+<hr class="my-4">
+{% endif %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>Senarai Tugasan</h5>
+    </div>
+    <div class="card-body">
+        {% if pesanan %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Pelanggan</th>
+                        <th style="min-width: 200px;">Catatan Reka Bentuk</th>
+                        <th>Fail Sedia Ada</th>
+                        <th style="width: 300px;">Tindakan & Muat Naik Fail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pesanan %}
+                    <tr>
+                        <td><strong>#{{ p.id }}</strong></td>
+                        <td>{{ p.nama_pelanggan }}</td>
+                        <td>
+                            <small class="text-muted">{{ p.reka_bentuk | truncate(100) }}</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_files', pesanan_id=p.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-folder-open me-1"></i> Lihat Fail
+                            </a>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('update_design_status', pesanan_id=p.id) }}" enctype="multipart/form-data">
+                                <div class="mb-2">
+                                    <input type="file" name="design_file" class="form-control form-control-sm" multiple>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <select name="status_baru" class="form-select" required>
+                                        <option value="Design Dalam Proses" {% if p.status == 'Design Dalam Proses' %}selected{% endif %}>Dalam Proses</option>
+                                        <option value="Sedia untuk Production" {% if p.status == 'Sedia untuk Production' %}selected{% endif %}>Sedia ke Production</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary" title="Kemas kini & Muat Naik">
+                                        <i class="fas fa-upload"></i> Update
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <p class="mb-0">Tiada tugasan reka bentuk buat masa ini. Kerja bagus!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

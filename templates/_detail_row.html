@@ -1,0 +1,49 @@
+<div class="row row-item align-items-center bg-light">
+    
+    <div class="col-md-3">
+        <input 
+            type="text" 
+            name="nama_pemain[]" 
+            class="form-control form-control-sm" 
+            placeholder="Nama..." 
+            value="{{ item.nama_pemain if item and item.nama_pemain else '' }}"
+        >
+    </div>
+    
+    <div class="col-md-2">
+        <input 
+            type="text" 
+            name="nombor[]" 
+            class="form-control form-control-sm" 
+            placeholder="Nombor..." 
+            value="{{ item.nombor if item and item.nombor else '' }}"
+        >
+    </div>
+    
+    <div class="col-md-2">
+        <select name="saiz[]" class="form-select form-select-sm saiz-select" required>
+            {% if item %}
+                <option value="{{ item.saiz }}" selected>{{ item.saiz }}</option>
+            {% else %}
+                <option value="" selected disabled>Saiz...</option>
+            {% endif %}
+        </select>
+    </div>
+    
+    <div class="col-md-2">
+        <input 
+            type="number" 
+            step="0.01" 
+            name="harga_unit[]" 
+            class="form-control form-control-sm" 
+            required 
+            value="{{ "%.2f"|format(item.harga_unit) if item and item.harga_unit is not none else '0.00' }}"
+        >
+    </div>
+    
+    <div class="col-md-1 text-center">
+        <button type="button" class="btn btn-danger btn-sm remove-row-btn">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}Senarai Fail untuk Pesanan #{{ pesanan.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Senarai Fail Reka Bentuk</h1>
+        <p class="lead text-muted">Pesanan #{{ pesanan.id }} - {{ pesanan.nama_pelanggan }}</p>
+    </div>
+    <a href="{{ url_for('urus_design') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if files %}
+            <ul class="list-group">
+                {% for file in files %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-file-alt me-2 text-muted"></i>{{ file.filename }}</span>
+                        <a href="{{ url_for('download_design', filename=file.filename) }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-download me-1"></i> Muat Turun
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-info">Tiada fail ditemui untuk pesanan ini.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

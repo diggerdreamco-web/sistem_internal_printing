@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invois | Sistem Bisnes Baju</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="nav-menu">
+        <h3>Menu Utama</h3>
+        <ul>
+            {% if session['peranan'] == 'admin' %}
+            <li><a href="{{ url_for('tambah_pengguna') }}">Urus Pengguna</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('tambah_pesanan') }}">Tambah Pesanan Baru</a></li>
+            <li><a href="{{ url_for('urus_pesanan') }}">Urus Pesanan</a></li>
+            
+            {% if session['peranan'] == 'admin' or session['peranan'] == 'sales' %}
+            <li><a href="{{ url_for('urus_pelanggan') }}">Urus Pelanggan</a></li>
+            <li><a href="{{ url_for('quotation', pelanggan_id=0) }}">Quotation</a></li>
+            <li><a href="{{ url_for('invoice', pelanggan_id=0) }}">Invois</a></li>
+            {% endif %}
+            
+            {% if session['peranan'] == 'admin' or session['peranan'] == 'production' %}
+            <li><a href="{{ url_for('urus_stok') }}">Urus Stok</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>Sistem Bisnes Baju</h1>
+            <div class="user-info">
+                <span>Selamat datang, {{ session['username'] }}! ({{ session['peranan'] }})</span>
+                <a href="{{ url_for('logout') }}">Log Keluar</a>
+            </div>
+        </div>
+
+        <div class="container">
+            <h1>Jana Invois</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            
+            {% if pelanggan %}
+            <div class="form-section">
+                <h2>Butiran Pelanggan</h2>
+                <p>Pelanggan dipilih: <strong>{{ pelanggan['nama'] }}</strong> (ID: {{ pelanggan['id'] }})</p>
+                <p>E-mel: {{ pelanggan['email'] }}</p>
+                <p>Telefon: {{ pelanggan['telefon'] }}</p>
+            </div>
+            {% else %}
+            <p>Sila pilih pelanggan dari halaman Urus Pelanggan untuk menjana Invois.</p>
+            {% endif %}
+
+            <div class="form-section">
+                <p>Status: Dalam pembinaan...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}Tetapan Syarikat{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Tetapan Syarikat</h1>
+</div>
+
+<form method="POST" action="{{ url_for('tetapan') }}">
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-building me-2"></i>Maklumat Syarikat</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">Maklumat ini akan dipaparkan pada dokumen seperti Quotation dan Jobsheet.</p>
+                    <div class="mb-3">
+                        <label for="nama_syarikat" class="form-label">Nama Syarikat</label>
+                        <input type="text" class="form-control" id="nama_syarikat" name="nama_syarikat" value="{{ tetapan.get('nama_syarikat', '') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="alamat_syarikat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat_syarikat" name="alamat_syarikat" rows="3">{{ tetapan.get('alamat_syarikat', '') }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefon_syarikat" class="form-label">Nombor Telefon</label>
+                            <input type="text" class="form-control" id="telefon_syarikat" name="telefon_syarikat" value="{{ tetapan.get('telefon_syarikat', '') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email_syarikat" class="form-label">Emel</label>
+                            <input type="email" class="form-control" id="email_syarikat" name="email_syarikat" value="{{ tetapan.get('email_syarikat', '') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bullseye me-2"></i>Tetapan Jualan</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">Tetapkan sasaran jualan untuk paparan di Dashboard.</p>
+                    <div class="mb-3">
+                        <label for="target_jualan_bulanan" class="form-label">Target Jualan Bulanan (RM)</label>
+                        <input type="number" step="100" class="form-control" id="target_jualan_bulanan" name="target_jualan_bulanan" value="{{ tetapan.get('target_jualan_bulanan', '0') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Semua Kemaskini</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

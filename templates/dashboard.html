@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard Utama{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Selamat Datang, {{ username }}!</h1>
+</div>
+
+{% if peranan == 'admin' and stok_rendah %}
+<div class="alert alert-danger shadow-sm">
+    <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Amaran Stok Rendah!</h4>
+    <p>Bahan mentah berikut berada di bawah paras minima dan perlu ditempah semula:</p>
+    <hr>
+    <ul class="mb-0">
+        {% for item in stok_rendah %}
+        <li>
+            <strong>{{ item.nama_bahan }}</strong>: Kuantiti tinggal {{ item.kuantiti }} {{ item.unit }} (Paras minimum: {{ item.kuantiti_minima }})
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-box-open icon-primary"></i> Pesanan Baru</h5>
+                <p class="display-4 fw-bold">{{ statistik.pesanan_baru }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-cogs icon-secondary"></i> Dalam Proses</h5>
+                <p class="display-4 fw-bold">{{ statistik.pesanan_proses }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-check-circle icon-primary"></i> Selesai</h5>
+                <p class="display-4 fw-bold">{{ statistik.pesanan_selesai }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Kemajuan Jualan Bulan Ini (Keseluruhan)</h5>
+        <p class="card-text">
+            <strong>RM {{ "%.2f"|format(jumlah_jualan_semasa or 0) }}</strong> / RM {{ "%.2f"|format(target_jualan or 0) }}
+        </p>
+        <div class="progress" style="height: 25px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                 style="width: {{ peratus_kemajuan }}%;" 
+                 aria-valuenow="{{ peratus_kemajuan }}" 
+                 aria-valuemin="0" aria-valuemax="100">
+                 <strong>{{ "%.1f"|format(peratus_kemajuan) }}%</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>5 Pesanan Terkini</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pelanggan</th>
+                                <th>Status</th>
+                                <th>Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pesanan_terkini %}
+                            <tr>
+                                <td><strong>#{{ p.id }}</strong></td>
+                                <td>{{ p.nama_pelanggan }}</td>
+                                <td>
+                                    {% set status_class = {'Baru': 'primary', 'Design Dalam Proses': 'info', 'Dalam Proses': 'warning', 'Selesai': 'success'}.get(p.status, 'secondary') %}
+                                    <span class="badge bg-{{ status_class }}">{{ p.status }}</span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('jobsheet', pesanan_id=p.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">Lihat Jobsheet</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center">Tiada pesanan lagi.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Prestasi Jualan Individu (Bulan Ini)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Pasukan Jualan</th>
+                                <th class="text-center">Pesanan</th>
+                                <th class="text-end">Jualan (RM)</th>
+                                <th style="width: 25%;">Kemajuan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sales in prestasi_jualan %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ sales.nama }}</td>
+                                <td class="text-center">{{ sales.jumlah_pesanan }}</td>
+                                <td class="text-end"><strong>{{ "%.2f"|format(sales.jumlah_jualan or 0) }}</strong></td>
+                                <td>
+                                    <div class="progress" title="{{ "%.1f"|format(sales.peratus_pencapaian) }}% tercapai">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ sales.peratus_pencapaian }}%;" 
+                                             aria-valuenow="{{ sales.peratus_pencapaian }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                             {{ "%.0f"|format(sales.peratus_pencapaian) }}%
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Target: RM {{ "%.0f"|format(sales.target_jualan or 0) }}</small>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">Tiada data jualan untuk dipaparkan.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

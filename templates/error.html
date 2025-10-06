@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}Ralat Aplikasi{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h4 class="alert-heading"><i class="fas fa-bug me-2"></i>Ops! Sesuatu Telah Berlaku.</h4>
+        <p>Terdapat ralat teknikal semasa cuba memproses permintaan anda. Sila laporkan mesej di bawah kepada pembangun:</p>
+        <hr>
+        <p class="mb-0"><strong>Butiran Ralat:</strong></p>
+        <pre class="bg-light p-2 rounded"><code>{{ error }}</code></pre>
+    </div>
+    <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+</div>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "layout.html" %}
+{% block title %}Urus Pesanan{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Senarai Pesanan</h1>
+    <a href="{{ url_for('tambah_pesanan') }}" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-1"></i> Tambah Pesanan Baru</a>
+</div>
+
+{% if peranan == 'sales' and sales_stats %}
+<div class="row g-4 mb-4">
+    <div class="col-md-6"><div class="card shadow-sm text-white bg-warning"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div><h5 class="card-title">Perlu Tindakan</h5><p class="display-4 fw-bold">{{ sales_stats.perlu_tindakan }}</p></div><i class="fas fa-exclamation-circle fa-3x opacity-50"></i></div><small>Pesanan baru yang perlu ditetapkan designer.</small></div></div></div>
+    <div class="col-md-6"><div class="card shadow-sm text-white bg-success"><div class="card-body"><div class="d-flex justify-content-between align-items-center"><div><h5 class="card-title">Jualan Bulan Ini</h5><p class="display-4 fw-bold">{{ sales_stats.jualan_bulan_ini }}</p></div><i class="fas fa-chart-line fa-3x opacity-50"></i></div><small>Jumlah pesanan yang diterima bulan ini.</small></div></div></div>
+</div>
+{% if tindakan_segera %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning"><h5 class="mb-0 text-dark"><i class="fas fa-rocket me-2"></i>Tindakan Segera Diperlukan</h5></div>
+    <div class="card-body">
+        <p class="card-text">Pesanan berikut berstatus "Baru" dan memerlukan pereka bentuk untuk ditetapkan.</p>
+        <ul class="list-group">
+            {% for p_segera in tindakan_segera %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>#{{ p_segera['id'] }}</strong> - {{ p_segera['nama_pelanggan'] }}
+                </div>
+                <a href="{{ url_for('assign_designer', pesanan_id=p_segera['id']) }}" class="btn btn-sm btn-primary"><i class="fas fa-user-plus me-1"></i> Tugaskan</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+<hr class="my-4">
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-header"><h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>Semua Pesanan</h5></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Pelanggan</th><th>Ringkasan Saiz</th>
+                        <th>Designer</th><th>Status</th><th class="text-center">Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pesanan %}
+                    <tr>
+                        <td><strong class="text-primary">#{{ p['id'] }}</strong></td>
+                        <td>{{ p['nama_pelanggan'] }}</td>
+                        <td><small>{{ p['saiz'] or '-' }}</small></td>
+                        <td>
+                            {% if p['designer_username'] %}
+                                <span class="badge bg-dark">{{ p['designer_username'] }}</span>
+                                {% if peranan in ['admin', 'sales'] %}<a href="{{ url_for('assign_designer', pesanan_id=p['id']) }}" class="ms-2 small">(Tukar)</a>{% endif %}
+                            {% else %}
+                                {% if peranan in ['admin', 'sales'] %}<a href="{{ url_for('assign_designer', pesanan_id=p['id']) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-user-plus me-1"></i> Tugaskan</a>{% else %}-{% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set status_map = {'Baru': 'primary', 'Design Dalam Proses': 'info', 'Sedia untuk Production': 'secondary', 'Dalam Proses': 'warning', 'Sedia Ambil': 'success', 'Selesai': 'dark', 'Batal': 'danger'} %}
+                            <span class="badge bg-{{ status_map.get(p['status'], 'secondary') }}">{{ p['status'] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info btn-sm" title="Pratonton Jobsheet"
+                                        data-bs-toggle="modal" data-bs-target="#previewJobsheetModal"
+                                        data-pesanan-id="{{ p['id'] }}"
+                                        data-nama-pelanggan="{{ p['nama_pelanggan'] }}"
+                                        data-fabrik="{{ p['nama_fabrik'] or 'Belum Ditetapkan' }}"
+                                        data-harga="{{ p['harga'] }}">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                {% if files_map.get(p.id) %}
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Muat Turun Fail Reka Bentuk">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item fw-bold" href="{{ url_for('download_all_files', pesanan_id=p.id) }}">
+                                                <i class="fas fa-file-archive me-2"></i>Muat Turun Semua (.zip)
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        {% for file in files_map[p.id] %}
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('download_design', filename=file.filename) }}">
+                                                {{ file.filename | truncate(30) }}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                <button type="button" class="btn btn-warning btn-sm" title="Kemaskini Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal" data-id="{{ p['id'] }}" data-status="{{ p['status'] }}"><i class="fas fa-edit"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="previewJobsheetModal" tabindex="-1" aria-labelledby="previewJobsheetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="previewJobsheetModalLabel">Pratonton Jobsheet</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <p>Maklumat berikut akan digunakan untuk menjana Jobsheet PDF.</p>
+                <h5 id="modal-preview-nama"></h5>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Fabrik:</strong> <span id="modal-preview-fabrik"></span></li>
+                    <li class="list-group-item"><strong>Harga:</strong> RM <span id="modal-preview-harga"></span></li>
+                </ul>
+                <small class="text-muted mt-2 d-block">Harga & Fabrik ditetapkan semasa tambah pesanan atau melalui pop-up Jobsheet di versi lama.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <a id="generate-pdf-link" href="#" class="btn btn-primary" target="_blank"><i class="fas fa-download me-2"></i>Jana & Muat Turun PDF</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="updateStatusModalLabel">Kemaskini Status Pesanan</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <form id="statusUpdateForm" method="POST" action="">
+                <div class="modal-body">
+                    <p>Anda sedang mengemaskini status untuk Pesanan ID: <strong id="modal-pesanan-id"></strong></p>
+                    <div class="mb-3">
+                        <label for="status_baru" class="form-label">Status Baru</label>
+                        <select class="form-select" id="status_baru" name="status_baru" required>
+                            <option value="Baru">Baru</option><option value="Design Dalam Proses">Design Dalam Proses</option><option value="Sedia untuk Production">Sedia untuk Production</option>
+                            <option value="Dalam Proses">Dalam Proses</option><option value="Sedia Ambil">Sedia Ambil</option><option value="Selesai">Selesai</option><option value="Batal">Batal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Kemaskini</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const updateStatusModal = document.getElementById('updateStatusModal');
+        if (updateStatusModal) {
+            updateStatusModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pesananId = button.getAttribute('data-id');
+                const currentStatus = button.getAttribute('data-status');
+                const modalPesananId = updateStatusModal.querySelector('#modal-pesanan-id');
+                const newStatusSelect = updateStatusModal.querySelector('#status_baru');
+                const statusUpdateForm = updateStatusModal.querySelector('#statusUpdateForm');
+                modalPesananId.textContent = pesananId;
+                newStatusSelect.value = currentStatus;
+                statusUpdateForm.setAttribute('action', '/update_pesanan/' + pesananId); 
+            });
+        }
+
+        const previewJobsheetModal = document.getElementById('previewJobsheetModal');
+        if (previewJobsheetModal) {
+            previewJobsheetModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pesananId = button.getAttribute('data-pesanan-id');
+                const namaPelanggan = button.getAttribute('data-nama-pelanggan');
+                const fabrik = button.getAttribute('data-fabrik');
+                const harga = button.getAttribute('data-harga');
+
+                const modalNama = previewJobsheetModal.querySelector('#modal-preview-nama');
+                const modalFabrik = previewJobsheetModal.querySelector('#modal-preview-fabrik');
+                const modalHarga = previewJobsheetModal.querySelector('#modal-preview-harga');
+                const pdfLink = previewJobsheetModal.querySelector('#generate-pdf-link');
+                
+                modalNama.textContent = `Pesanan #${pesananId} - ${namaPelanggan}`;
+                modalFabrik.textContent = fabrik;
+                modalHarga.textContent = harga ? parseFloat(harga).toFixed(2) : '0.00';
+
+                pdfLink.href = `/jobsheet/${pesananId}`;
+            });
+        }
+    });
+</script>
+{% endblock %}

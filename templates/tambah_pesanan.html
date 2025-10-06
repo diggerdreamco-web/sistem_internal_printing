@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+
+{% block title %}Tambah Pesanan Baru{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Tambah Pesanan Baru</h1>
+</div>
+
+<form method="POST" action="{{ url_for('tambah_pesanan') }}">
+    <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-user-tag me-2"></i>Maklumat Asas Pesanan</h5></div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="nama_pelanggan" class="form-label">Nama Pelanggan</label>
+                    <input type="text" class="form-control" name="nama_pelanggan" id="nama_pelanggan" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="jenis_baju" class="form-label">Jenis Baju</label>
+                    <input type="text" class="form-control" name="jenis_baju" id="jenis_baju">
+                </div>
+                <div class="col-md-4">
+                    <label for="fabrik_id" class="form-label">Jenis Fabrik</label>
+                    <select name="fabrik_id" id="fabrik_id" class="form-select" required>
+                        <option value="" disabled selected>--- Pilih Fabrik ---</option>
+                        {% for f in fabriks %}
+                            <option value="{{ f.id }}">{{ f.nama_fabrik }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-tshirt me-2"></i>Butiran Saiz & Nama</h5>
+            <button type="button" id="add-row" class="btn btn-sm btn-success"><i class="fas fa-plus me-1"></i>Tambah Baris</button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nama pada Baju (Pilihan)</th>
+                            <th>No. Jersi (Pilihan)</th>
+                            <th>Saiz (Wajib)</th>
+                            <th style="width: 150px;">Harga Seunit (RM)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="detail-rows">
+                        <tr>
+                            <td><input type="text" name="pemain_nama[]" class="form-control"></td>
+                            <td><input type="text" name="jersi_no[]" class="form-control"></td>
+                            <td>
+                                <select name="saiz[]" class="form-select saiz-dropdown" required>
+                                    <option value="" disabled selected>Pilih Saiz</option>
+                                    <option value="XS">XS</option><option value="S">S</option><option value="M">M</option>
+                                    <option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option>
+                                    <option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option>
+                                </select>
+                            </td>
+                            <td><span class="harga-seunit fw-bold">-</span></td>
+                            <td><button type="button" class="btn btn-sm btn-danger remove-row"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+             <hr>
+             <div class="row">
+                <div class="col-md-8">
+                    <label for="reka_bentuk" class="form-label">Keterangan Tambahan Reka Bentuk</label>
+                    <textarea class="form-control" name="reka_bentuk" id="reka_bentuk" rows="3"></textarea>
+                </div>
+                <div class="col-md-4 d-flex flex-column justify-content-center align-items-end">
+                    <h3>Jumlah Harga:</h3>
+                    <h2 id="anggaran-harga" class="fw-bold">RM 0.00</h2>
+                    <input type="hidden" name="harga_akhir" id="harga_akhir" value="0">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 text-end">
+        <a href="{{ url_for('urus_pesanan') }}" class="btn btn-secondary">Batal</a>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Pesanan</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fabrikSelect = document.getElementById('fabrik_id');
+    const tableBody = document.getElementById('detail-rows');
+    const addRowBtn = document.getElementById('add-row');
+    const hargaDisplay = document.getElementById('anggaran-harga');
+    const hargaHiddenInput = document.getElementById('harga_akhir');
+
+    let hargaMap = {}; 
+
+    // 1. Dapatkan senarai harga bila fabrik dipilih
+    fabrikSelect.addEventListener('change', function() {
+        const fabrikId = this.value;
+        if (fabrikId) {
+            fetch(`/get_harga_semua_saiz/${fabrikId}`)
+                .then(response => response.json())
+                .then(data => {
+                    hargaMap = data;
+                    updatePricesAndTotal(); 
+                });
+        } else {
+            hargaMap = {};
+            updatePricesAndTotal();
+        }
+    });
+
+    // 2. Fungsi untuk mengemas kini semua harga
+    function updatePricesAndTotal() {
+        let total = 0;
+        const rows = tableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const dropdown = row.querySelector('.saiz-dropdown');
+            const priceSpan = row.querySelector('.harga-seunit');
+            const selectedSaiz = dropdown.value;
+            
+            if (selectedSaiz && hargaMap[selectedSaiz]) {
+                const harga = parseFloat(hargaMap[selectedSaiz]);
+                priceSpan.textContent = harga.toFixed(2);
+                total += harga;
+            } else {
+                priceSpan.textContent = '-';
+            }
+        });
+        
+        hargaDisplay.textContent = `RM ${total.toFixed(2)}`;
+        hargaHiddenInput.value = total.toFixed(2);
+    }
+
+    // 3. Panggil updatePricesAndTotal bila saiz diubah
+    tableBody.addEventListener('change', function(event) {
+        if (event.target.classList.contains('saiz-dropdown')) {
+            updatePricesAndTotal();
+        }
+    });
+    
+    // 4. Tambah baris baru dengan lajur harga
+    addRowBtn.addEventListener('click', function() {
+        const newRowHTML = `
+            <tr>
+                <td><input type="text" name="pemain_nama[]" class="form-control"></td>
+                <td><input type="text" name="jersi_no[]" class="form-control"></td>
+                <td>
+                    <select name="saiz[]" class="form-select saiz-dropdown" required>
+                        <option value="" disabled selected>Pilih Saiz</option>
+                        <option value="XS">XS</option><option value="S">S</option><option value="M">M</option>
+                        <option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option>
+                        <option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option>
+                    </select>
+                </td>
+                <td><span class="harga-seunit fw-bold">-</span></td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-row"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
+        tableBody.insertAdjacentHTML('beforeend', newRowHTML);
+    });
+
+    // 5. Buang baris dan kira semula harga
+    tableBody.addEventListener('click', function(event) {
+        if (event.target.closest('.remove-row')) {
+            if (tableBody.querySelectorAll('tr').length > 1) {
+                event.target.closest('tr').remove();
+                updatePricesAndTotal(); 
+            } else {
+                alert('Sekurang-kurangnya satu baris butiran diperlukan.');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

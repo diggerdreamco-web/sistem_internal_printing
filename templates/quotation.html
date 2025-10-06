@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation | Sistem Bisnes Baju</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    </head>
+<body {% if print_mode %} class="pdf-mode" {% endif %}>
+    <div class="nav-menu">
+        <h3>Menu Utama</h3>
+        <ul>
+            {% if session['peranan'] == 'admin' %}
+            <li><a href="{{ url_for('tambah_pengguna') }}">Urus Pengguna</a></li>
+            {% endif %}
+            
+            <li><a href="{{ url_for('tambah_pesanan') }}">Tambah Pesanan Baru</a></li>
+            <li><a href="{{ url_for('urus_pesanan') }}">Urus Pesanan</a></li>
+            
+            {% if session['peranan'] == 'admin' or session['peranan'] == 'sales' %}
+            <li><a href="{{ url_for('urus_pelanggan') }}">Urus Pelanggan</a></li>
+            <li><a href="{{ url_for('quotation', pelanggan_id=0) }}">Quotation</a></li>
+            <li><a href="{{ url_for('invoice', pelanggan_id=0) }}">Invois</a></li>
+            {% endif %}
+            
+            {% if session['peranan'] == 'admin' or session['peranan'] == 'production' %}
+            <li><a href="{{ url_for('urus_stok') }}">Urus Stok</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Sistem Bisnes Baju</h1>
+            <div class="user-info">
+                <span>Selamat datang, {{ session['username'] }}! ({{ session['peranan'] }})</span>
+                <a href="{{ url_for('logout') }}">Log Keluar</a>
+            </div>
+        </div>
+
+        <div class="container">
+            
+            {% if not print_mode %}
+            <div class="action-buttons print-btn">
+                <a href="{{ url_for('quotation', pelanggan_id=pelanggan['id'] if pelanggan else 0, download=true) }}" 
+                   class="btn-action btn-invoice">Download PDF</a>
+                <button class="btn-action btn-quote" onclick="window.print()">Cetak Quotation</button>
+            </div>
+            {% endif %}
+            
+            <h1>Sebut Harga (Quotation)</h1>
+
+            <div class="quotation-box">
+                <div class="header-quote">
+                    <h2>QUOTATION</h2>
+                    <p>Tarikh: **{{ now.strftime('%d-%m-%Y') }}**</p>
+                    <p>Nombor Sebut Harga: **QT-{{ pelanggan['id'] if pelanggan else '0000' }}{{ now.strftime('%Y%m%d') }}**</p>
+                </div>
+
+                <hr>
+
+                <div class="details-quote">
+                    <h3>Maklumat Pelanggan:</h3>
+                    {% if pelanggan %}
+                    <p><strong>Nama:</strong> {{ pelanggan['nama'] }}</p>
+                    <p><strong>Telefon:</strong> {{ pelanggan['telefon'] }}</p>
+                    <p><strong>E-mel:</strong> {{ pelanggan['email'] }}</p>
+                    <p><strong>Alamat:</strong> {{ pelanggan['alamat'] }}</p>
+                    {% else %}
+                    <p style="color: red;">Sila pilih pelanggan dari halaman Urus Pelanggan untuk mengisi maklumat secara automatik.</p>
+                    <p>Nama: _______________________________</p>
+                    <p>Telefon: _______________________________</p>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <div class="items-table">
+                    <h3>Butiran Pesanan / Harga:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Keterangan (Jenis Baju, Saiz, Warna, Cetakan)</th>
+                                <th>Kuantiti</th>
+                                <th>Harga Seunit (RM)</th>
+                                <th>Jumlah (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>T-Shirt Round Neck - L - Hitam - Cetakan Logo Depan</td>
+                                <td>100</td>
+                                <td>15.00</td>
+                                <td class="float-right">1,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Kos Penghantaran</td>
+                                <td>1</td>
+                                <td>20.00</td>
+                                <td class="float-right">20.00</td>
+                            </tr>
+                            <tr><td colspan="5" style="height: 30px;"></td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="float-right">Jumlah Kecil (Subtotal)</td>
+                                <td class="float-right">1,520.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="float-right">Diskaun (0%)</td>
+                                <td class="float-right">0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="float-right">Jumlah Akhir (Total)</td>
+                                <td class="float-right">**1,520.00**</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <hr>
+                
+                <p>Tempoh sah laku sebut harga: 30 hari.</p>
+                <p>Syarat Pembayaran: 50% Deposit, Baki selepas siap.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

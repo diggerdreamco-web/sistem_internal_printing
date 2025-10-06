@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Urus Fabrik{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Urus Fabrik</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Tambah Fabrik Baru</h5></div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('urus_fabrik') }}">
+                    <div class="mb-3">
+                        <label for="nama_fabrik" class="form-label">Nama Fabrik</label>
+                        <input type="text" name="nama_fabrik" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Senarai Fabrik Sedia Ada</h5></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for f in fabriks %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ f.nama_fabrik }}
+                        <div class="btn-group">
+                            <a href="{{ url_for('urus_harga', fabrik_id=f.id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-dollar-sign me-1"></i>Set Harga</a>
+                            <form action="{{ url_for('padam_fabrik', fabrik_id=f.id) }}" method="POST" onsubmit="return confirm('Padam fabrik ini akan membuang semua tetapan harganya. Teruskan?');" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item">Tiada fabrik ditemui.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
