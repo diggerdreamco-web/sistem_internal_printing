@@ -1,13 +1,9 @@
-# init_db.py
 import sqlite3
 from werkzeug.security import generate_password_hash
 import os
 
 print("Skrip ini akan memulakan pangkalan data.")
-confirmation = input("Amaran: Jika jadual sudah wujud, ia tidak akan diubah. Teruskan? (y/n): ")
-if confirmation.lower() != 'y':
-    print("Operasi dibatalkan.")
-    exit()
+# Baris input() telah dibuang untuk membolehkan automasi di Render
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_NAME = os.path.join(BASE_DIR, "bisnes.db")
